@@ -32,83 +32,74 @@ Based on this [article](http://java.dzone.com/articles/apache-tomee-shrinkwrap-j
 </dependencies>
 ```
 
-```java
-import javax.ejb.Stateless;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-
+```xtend
 @Stateless
 @Path("/sample")
-public class SampleController {
+class SampleController {
 
     @GET
     @Produces("text/plain")
-    public String sample() {
-        return "Hello World";
+    def sample() {
+        "Hello World"
     }
 
-    public static void main(String args[]) {
-        TomEEApplication.run(SampleController.class);
+    def static main(String[] args) {
+        TomEEApplication.run(typeof(SampleController));
     }
 }
+
 ```
 
-```java
-public class TomEEApplication {
+```xtend
+class TomEEApplication {
 
-  private static void startAndDeploy(Archive<?> archive) {
-
-    Container container;
-
-      try {
-        Configuration configuration = new Configuration();
-        String tomeeDir = Files.createTempDirectory("apache-tomee").toFile().getAbsolutePath();
-        configuration.setDir(tomeeDir);
-        configuration.setHttpPort(8080);
-
-        container = new Container();
-        container.setup(configuration);
-
-        final File app = new File(Files.createTempDirectory("app").toFile().getAbsolutePath());
-        app.deleteOnExit();
-
-        File target = new File(app, "app.war");
-        archive.as(ZipExporter.class).exportTo(target, true);
-        container.start();
-
-        container.deploy("app", target);
-        container.await();
-
-      } catch (Exception e) {
-          throw new IllegalArgumentException(e);
-      }
-
-      registerShutdownHook(container);
-
-  }
-
-  private static void registerShutdownHook(final Container container) {
-    Runtime.getRuntime().addShutdownHook(new Thread() {
-      @Override
-      public void run() {
+    def static startAndDeploy(Archive<?> archive) {
         try {
-          if(container != null) {
-            container.stop();
-          }
-        } catch (final Exception e) {
-          throw new IllegalArgumentException(e);
+            val configuration = new Configuration()
+            val String tomeeDir = Files.createTempDirectory("apache-tomee").toFile().getAbsolutePath()
+            configuration.setDir(tomeeDir)
+            configuration.setHttpPort(8080)
+
+            val container = new Container()
+            container.setup(configuration)
+
+            val app = new File(Files.createTempDirectory("app").toFile().getAbsolutePath())
+            app.deleteOnExit()
+
+            val target = new File(app, "app.war")
+            archive.^as(typeof(ZipExporter)).exportTo(target, true)
+            container.start()
+
+            container.deploy("app", target)
+            container.await()
+
+            registerShutdownHook(container)
+
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e)
         }
-      }
-    });
-  }
+    }
 
-  public static void run(Class<?> ... clazzes) {
-    run(ShrinkWrap.create(WebArchive.class).addClasses(clazzes));
-  }
+    def static registerShutdownHook(Container container) {
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+        	override run() {
+        		try {
+                    if (container != null) {
+                        container.stop()
+                    }
+                } catch (Exception e) {
+                    throw new IllegalArgumentException(e)
+                }
+        	}
+        });
+    }
 
-  public static void run(WebArchive archive) {
-    startAndDeploy(archive);
-  }
+    def static run(Class<?>... clazzes) {
+        run(ShrinkWrap.create(typeof(WebArchive)).addClasses(clazzes))
+    }
+
+    def static run(WebArchive archive) {
+        startAndDeploy(archive)
+    }
 }
 ```
