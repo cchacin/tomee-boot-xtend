@@ -10,12 +10,6 @@ Based on this [article](http://java.dzone.com/articles/apache-tomee-shrinkwrap-j
     <artifactId>tomee-embedded</artifactId>
     <version>1.7.1</version>
   </dependency>
-
-  <dependency>
-    <groupId>org.apache.openejb</groupId>
-    <artifactId>openejb-cxf-rs</artifactId>
-    <version>4.7.1</version>
-  </dependency>
   
   <dependency>
     <groupId>org.apache.openejb</groupId>
